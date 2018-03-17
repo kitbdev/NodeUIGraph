@@ -9,7 +9,6 @@ public class NodeUIGraph : ScriptableObject {
 
 	private Vector2 defaultNodeSize = new Vector2(200, 50);
 	public List<Node> nodes;
-	public Node tNode;
 
 	void OnEnable()
 	{

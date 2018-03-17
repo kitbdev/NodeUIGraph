@@ -35,11 +35,11 @@ public class Node : ScriptableObject {
 		
 		// setup style
 		normalStyle = new GUIStyle();
-		// normalStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture2D;
+		normalStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture2D;
 		normalStyle.border = new RectOffset(12, 12, 12, 12);
 
 		selectedStyle = new GUIStyle();
-		// selectedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1 pn.png") as Texture2D;
+		selectedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1 pn.png") as Texture2D;
 		selectedStyle.border = new RectOffset(15, 15, 15, 15);
 		inputConnectorStyle = new GUIStyle();
 		inputConnectorConnectedStyle = new GUIStyle();
@@ -48,11 +48,10 @@ public class Node : ScriptableObject {
 	}
 
 	public void NodeDraw(SerializedObject me) {
-		// node.Update();
-		Debug.Log("Drawing " + me.GetType());
+		me.Update();
 		// if (node.GetType().IsSubclassOf(typeof(PropertyNode)) || node.GetType()==typeof(PropertyNode))
 		Rect rect = me.FindProperty("nodeUIRect").rectValue;
-		GUI.Box(rect, me.FindProperty("nodeUITitle").stringValue, isSelected ? selectedStyle : normalStyle);
+		GUI.Box(rect, me.FindProperty("nodeUITitle").stringValue);//, isSelected ? selectedStyle : normalStyle);
 		SerializedProperty sp = me.GetIterator();
 		sp.Next(true);
 		sp.NextVisible(true); // ignore Script
@@ -62,16 +61,20 @@ public class Node : ScriptableObject {
 		sp.NextVisible(false); // ignore outputs
 		float lineHeight = EditorGUIUtility.singleLineHeight;
 		Rect nextPropRect = new Rect(rect.x + 10, rect.y + 5, rect.width / 5, lineHeight);
-		Rect boxRect = new Rect();
+		float boxHeight = 10;
+		Rect boxRect = new Rect(nextPropRect.x - 10, nextPropRect.y + boxHeight/2, boxHeight, boxHeight);
 		while (sp.NextVisible(false)) {
 			// NodeDrawProperty(nextPropRect, sp);
-			GUI.Box(boxRect, GUIContent.none, inputConnectorStyle);
+			GUI.Box(boxRect, GUIContent.none);//, inputConnectorStyle);
 			EditorGUI.LabelField(nextPropRect, sp.displayName);
 			// EditorGUI.PropertyField(nextPropRect, sp, GUIContent.none);
 			nextPropRect.y += lineHeight + 2;
+			boxRect.y+=lineHeight+2;
 		}
-		// rect.height = nextPropRect.y - rect.y;
+		rect.height = nextPropRect.y - rect.y;
+		me.FindProperty("nodeUIRect").rectValue = rect;
 		me.ApplyModifiedProperties();
+		// me.Update();
 		graph.Save();
 	}
 	public void NodeDrawProperty(Rect rect, SerializedProperty prop) {
