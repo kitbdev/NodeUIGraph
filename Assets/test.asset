@@ -28,14 +28,14 @@ MonoBehaviour:
   nodeUITitle: Node
   nodeUIRect:
     serializedVersion: 2
-    x: 394
-    y: 69
+    x: 387
+    y: 66
     width: 200
     height: 59
   inputConnections: []
   outputs: []
   prop: 
-  prop2: 0
+  prop2: 26
   proprtyNumberThree: {fileID: 0}
 --- !u!114 &114803214884456816
 MonoBehaviour:
@@ -51,12 +51,12 @@ MonoBehaviour:
   nodeUITitle: Node
   nodeUIRect:
     serializedVersion: 2
-    x: 117
-    y: 59
+    x: 70
+    y: 82
     width: 200
     height: 59
   inputConnections: []
   outputs: []
-  prop: 
+  prop: hahahahhwertyuiop
   prop2: 0
   proprtyNumberThree: {fileID: 0}

@@ -8,7 +8,7 @@ public class NodeUIGraphEditor : EditorWindow {
 	Vector2 offset;
 
 	private Rect menuBar;
-	
+
 	// SerializedProperty nodes;
 	public NodeUIGraph nodeUIGraph;
 
@@ -17,8 +17,7 @@ public class NodeUIGraphEditor : EditorWindow {
 		NodeUIGraphEditor window = GetWindow<NodeUIGraphEditor>();
 		window.titleContent = new GUIContent("Node UI Graph Editor");
 	}
-	void OnEnable() {
-	}
+	void OnEnable() {}
 	private void Awake() {
 		OnSelectionChange();
 	}
@@ -34,7 +33,7 @@ public class NodeUIGraphEditor : EditorWindow {
 		DrawGrid(20, 0.2f, Color.grey);
 		DrawGrid(100, 0.4f, Color.grey);
 		DrawMenuBar();
-		
+
 		if (nodeUIGraph != null) {
 			DrawAllNodes();
 
@@ -85,7 +84,8 @@ public class NodeUIGraphEditor : EditorWindow {
 	}
 	private void DrawAllNodes() {
 		if (nodeUIGraph.nodes != null) {
-			for (int i = 0; i < nodeUIGraph.nodes.Count; i++) {
+			for (int i = 0; i < nodeUIGraph.nodes.Count; i++)
+			{
 				nodeUIGraph.nodes[i].NodeDraw(nodeUIGraph.GetSerializedNode(nodeUIGraph.nodes[i]));
 			}
 		}
