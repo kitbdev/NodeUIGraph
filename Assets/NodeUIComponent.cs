@@ -4,13 +4,21 @@ using UnityEngine;
 
 public class NodeUIComponent : MonoBehaviour {
 
-	// Use this for initialization
+	
+
 	void Start () {
 		
 	}
 	
-	// Update is called once per frame
 	void Update () {
+		
+	}
+	/// <summary>
+	/// OnGUI is called for rendering and handling GUI events.
+	/// This function can be called multiple times per frame (one call per event).
+	/// </summary>
+	void OnGUI()
+	{
 		
 	}
 }
