@@ -9,7 +9,7 @@ public class Node : ScriptableObject {
 
 	public string nodeUITitle = "Node";
 	public Rect nodeUIRect;
-	private bool isDragged;
+	private bool isDragged = false;
 	protected bool isSelected;
 	[NonSerialized]
 	public NodeUIGraph graph;
@@ -128,13 +128,13 @@ public class Node : ScriptableObject {
 	}
 
 	public void AddOutput<T>(string name, T defaultValue = default(T)) {
-		outputs.Add(new NodeOutput<T>(name, defaultValue));
+		outputs.Add(new NodeConnector<T>(name, defaultValue));
 	}
 
 	public void SetOutput<T>(string name, T value) {
 		NodeConnector nodeOutput = outputs.Find((no) => { return no.propertyName == name; });
 		if (nodeOutput != null) {
-			nodeOutput.SetValue(value);
+			((NodeConnector<T>)nodeOutput).value = value;
 		}
 	}
 
@@ -150,37 +150,22 @@ public class Node : ScriptableObject {
 public class NodeConnector : ScriptableObject {
 
 	public string propertyName;
-	public Node connection;
+	public NodeConnector connectedInput;
 	public NodeConnector(string name) {
 		this.propertyName = name;
 	}
-	public virtual T GetValue<T>() {return default(T);}
-	public virtual void SetValue<T>(T t) {}
+	public T GetValue<T>() {
+		return ((NodeConnector<T>)this).value;
+	}
+	public virtual void SetValue<T>(T t) {
+		((NodeConnector<T>)this).value = t;
+	}
 }
-public class NodeOutput<T> : NodeConnector {
+public class NodeConnector<T> : NodeConnector {
 	public T value;
 	public T defaultValue;
-	public NodeOutput(string name, T defaultValue) : base(name) {
+	public NodeConnector(string name, T defaultValue) : base(name) {
 		this.defaultValue = defaultValue;
 		this.value = this.defaultValue;
-	}
-
-	public override T1 GetValue<T1>() {
-		try {
-			if (typeof(T1) == typeof(T) || typeof(T1).IsSubclassOf(typeof(T))) {
-				return (T1) Convert.ChangeType(value, typeof(T1));
-			}
-		} catch (Exception) {}
-		Debug.LogError("Invalid Get Type '" + typeof(T1).ToString() + "' on node output " + propertyName);
-		return default(T1);
-	}
-
-	public override void SetValue<T1>(T1 t) {
-		try {
-			if (typeof(T1) == typeof(T) || typeof(T1).IsSubclassOf(typeof(T))) {
-				value = (T) Convert.ChangeType(t, typeof(T));
-			}
-		} catch (Exception) {}
-		Debug.LogError("Invalid Set Type '" + typeof(T1).ToString() + "' of Value '" + t.ToString() + "' on node output " + propertyName);
 	}
 }
