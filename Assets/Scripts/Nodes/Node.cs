@@ -6,12 +6,13 @@ using UnityEngine;
 
 public class Node : ScriptableObject {
 
-	public Rect nodeUIRect;
 	public string nodeUITitle;
+	public Rect nodeUIRect;
 	private bool isDragged;
 	protected bool isSelected;
 	protected NodeUIGraph graph;
-	public List<NodeOutput> outputs;
+	public List<NodeConnector> inputConnections;
+	public List<NodeConnector> outputs;
 
 	//testing
 	public string prop;
@@ -20,6 +21,33 @@ public class Node : ScriptableObject {
 
 	public Node() {}
 
+	public void NodeDraw(SerializedObject me) {
+		// node.Update();
+		Debug.Log ("Drawing "+me.GetType());
+		// if (node.GetType().IsSubclassOf(typeof(PropertyNode)) || node.GetType()==typeof(PropertyNode))
+		Rect rect = me.FindProperty("nodeUIRect").rectValue;
+		GUI.Box(rect, me.FindProperty("nodeUITitle").stringValue, isSelected ? graph.nodeUISelectedStyle : graph.nodeUIStyle);
+		SerializedProperty sp = me.GetIterator();
+		sp.Next(true);
+		sp.NextVisible(true); // ignore Script
+		sp.NextVisible(false); // ignore title
+		sp.NextVisible(false); // ignore rect
+		sp.NextVisible(false); // ignore input connections
+		sp.NextVisible(false); // ignore outputs
+		float lineHeight = EditorGUIUtility.singleLineHeight;
+		Rect nextPropRect = new Rect(rect.x + 10, rect.y + 5, rect.width / 5, lineHeight);
+		while (sp.NextVisible(false)) {
+			NodeDrawProperty(nextPropRect, sp);
+			nextPropRect.y += lineHeight + 2;
+		}
+		// rect.height = nextPropRect.y - rect.y;
+		me.ApplyModifiedProperties();
+	}
+	public void NodeDrawProperty(Rect rect, SerializedProperty prop) {
+			Debug.Log("showing " + prop.type +" "+ prop.displayName + " at " + rect);
+			
+	}
+
 	public void ProcessEvents(Event e) {
 		switch (e.type) {
 			case EventType.MouseDown:
@@ -27,6 +55,7 @@ public class Node : ScriptableObject {
 					if (e.button == 0) {
 						isDragged = true;
 						isSelected = true;
+						Selection.activeObject = this;
 						GUI.changed = true;
 					} else if (e.button == 1) {
 						isSelected = true;
@@ -67,27 +96,30 @@ public class Node : ScriptableObject {
 	}
 
 	public void SetOutput<T>(string name, T value) {
-		NodeOutput nodeOutput = outputs.Find((no) => { return no.name == name; });
+		NodeConnector nodeOutput = outputs.Find((no) => { return no.name == name; });
 		if (nodeOutput != null) {
 			nodeOutput.SetValue(value);
 		}
 	}
 
+	public void GetConnectionValues() {
+
+	}
+
 	public virtual void Start() {}
-	public virtual void Update() {}
 	public virtual void OnGUI() {}
 }
-public abstract class NodeOutput {
+public abstract class NodeConnector {
 
 	public string name;
 	public Node connection;
-	public NodeOutput(string name) {
+	public NodeConnector(string name) {
 		this.name = name;
 	}
 	public abstract T GetValue<T>();
 	public abstract void SetValue<T>(T t);
 }
-public class NodeOutput<T> : NodeOutput {
+public class NodeOutput<T> : NodeConnector {
 	public T value;
 	public T defaultValue;
 	public NodeOutput(string name, T defaultValue) : base(name) {

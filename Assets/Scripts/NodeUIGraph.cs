@@ -9,6 +9,10 @@ public class NodeUIGraph : ScriptableObject {
 
 	private Vector2 defaultNodeSize = new Vector2(200, 50);
 	public List<Node> nodes {get;protected set;}
+	public GUIStyle nodeUIStyle;
+	public GUIStyle nodeUISelectedStyle;
+
+
 	public void AddNodeAt(Vector2 pos) {
 		if (nodes == null) {
 			nodes = new List<Node>();
@@ -34,6 +38,15 @@ public class NodeUIGraph : ScriptableObject {
 		if (nodes.Contains(node)) {
 			nodes.Remove(node);
 		}
+	}
+
+	public void Connect(NodeConnector output, NodeConnector input) {
+
+	}
+
+	public int GetNumInputsOnNode(Node node) {
+		// serialize and count the properties
+		return 0;
 	}
 
 }
