@@ -12,7 +12,8 @@ public class NodeUIGraphEditor : EditorWindow {
 
 	private Rect menuBar;
 	
-	NodeUIGraph nodeUIGraph;
+	// SerializedProperty nodes;
+	public NodeUIGraph nodeUIGraph;
 
 	[MenuItem("Window/Node UI Graph Editor")]
 	private static void OpenWindow() {
@@ -28,10 +29,13 @@ public class NodeUIGraphEditor : EditorWindow {
 		nodeSelectedStyle = new GUIStyle();
 		nodeSelectedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1 pn.png") as Texture2D;
 		nodeSelectedStyle.border = new RectOffset(12, 12, 12, 12);
-		nodeUIGraph.nodeUIStyle = nodeStyle;
-		nodeUIGraph.nodeUIStyle = nodeSelectedStyle;
+		// nodeUIGraph.nodeUIStyle = nodeStyle;
+		// nodeUIGraph.nodeUIStyle = nodeSelectedStyle;
 	}
-	private void OnFocus() {
+	private void Awake() {
+		OnSelectionChange();
+	}
+	private void OnSelectionChange() {
 		// select the current object
 		if (Selection.activeObject as NodeUIGraph != null) {
 			nodeUIGraph = Selection.activeObject as NodeUIGraph;
@@ -42,6 +46,7 @@ public class NodeUIGraphEditor : EditorWindow {
 		DrawGrid(20, 0.2f, Color.grey);
 		DrawGrid(100, 0.4f, Color.grey);
 		DrawMenuBar();
+		
 		if (nodeUIGraph != null) {
 			DrawAllNodes();
 
@@ -108,7 +113,7 @@ public class NodeUIGraphEditor : EditorWindow {
 		switch (e.type) {
 			case EventType.MouseDown:
 				if (e.button == 0) {
-					Selection.activeObject = this;
+					Selection.activeObject = nodeUIGraph;
 				}
 				if (e.button == 1) {
 					GenericMenu contextMenu = new GenericMenu();
@@ -125,7 +130,7 @@ public class NodeUIGraphEditor : EditorWindow {
 	[MenuItem("Assets/Create/NodeUIGraph")]
 	private static void CreateAsset() {
 		string filePath = AssetDatabase.GetAssetPath(Selection.activeObject);
-		if (Selection.activeObject.GetType() != typeof(UnityEngine.Object)) {
+		if (Selection.activeObject && Selection.activeObject.GetType() != typeof(UnityEngine.Object)) {
 			filePath = filePath.Substring(0, filePath.LastIndexOf("/"));
 		}
 		filePath = filePath + "/nodeuigraph.asset";

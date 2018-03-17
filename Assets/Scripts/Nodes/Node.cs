@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+[Serializable]
 public class Node : ScriptableObject {
 
 	public string nodeUITitle;
@@ -23,10 +24,10 @@ public class Node : ScriptableObject {
 
 	public void NodeDraw(SerializedObject me) {
 		// node.Update();
-		Debug.Log ("Drawing "+me.GetType());
+		Debug.Log("Drawing " + me.GetType());
 		// if (node.GetType().IsSubclassOf(typeof(PropertyNode)) || node.GetType()==typeof(PropertyNode))
 		Rect rect = me.FindProperty("nodeUIRect").rectValue;
-		GUI.Box(rect, me.FindProperty("nodeUITitle").stringValue, isSelected ? graph.nodeUISelectedStyle : graph.nodeUIStyle);
+		GUI.Box(rect, me.FindProperty("nodeUITitle").stringValue); //todo, isSelected ? graph.nodeUISelectedStyle : graph.nodeUIStyle);
 		SerializedProperty sp = me.GetIterator();
 		sp.Next(true);
 		sp.NextVisible(true); // ignore Script
@@ -44,8 +45,8 @@ public class Node : ScriptableObject {
 		me.ApplyModifiedProperties();
 	}
 	public void NodeDrawProperty(Rect rect, SerializedProperty prop) {
-			Debug.Log("showing " + prop.type +" "+ prop.displayName + " at " + rect);
-			
+		// Debug.Log("showing " + prop.type +" "+ prop.displayName + " at " + rect);
+
 	}
 
 	public void ProcessEvents(Event e) {
@@ -57,16 +58,19 @@ public class Node : ScriptableObject {
 						isSelected = true;
 						Selection.activeObject = this;
 						GUI.changed = true;
+						e.Use();
 					} else if (e.button == 1) {
 						isSelected = true;
 						GUI.changed = true;
 						GenericMenu contextMenu = new GenericMenu();
 						HandleContextMenu(contextMenu, e);
+						e.Use();
 					}
 				} else {
 					if (e.button == 0) {
 						isSelected = false;
 						GUI.changed = true;
+						e.Use();
 					}
 				}
 				break;
@@ -96,7 +100,7 @@ public class Node : ScriptableObject {
 	}
 
 	public void SetOutput<T>(string name, T value) {
-		NodeConnector nodeOutput = outputs.Find((no) => { return no.name == name; });
+		NodeConnector nodeOutput = outputs.Find((no) => { return no.propertyName == name; });
 		if (nodeOutput != null) {
 			nodeOutput.SetValue(value);
 		}
@@ -109,12 +113,14 @@ public class Node : ScriptableObject {
 	public virtual void Start() {}
 	public virtual void OnGUI() {}
 }
-public abstract class NodeConnector {
 
-	public string name;
+[Serializable]
+public abstract class NodeConnector : ScriptableObject {
+
+	public string propertyName;
 	public Node connection;
 	public NodeConnector(string name) {
-		this.name = name;
+		this.propertyName = name;
 	}
 	public abstract T GetValue<T>();
 	public abstract void SetValue<T>(T t);
@@ -133,7 +139,7 @@ public class NodeOutput<T> : NodeConnector {
 				return (T1) Convert.ChangeType(value, typeof(T1));
 			}
 		} catch (Exception e) {}
-		Debug.LogError("Invalid Get Type '" + typeof(T1).ToString() + "' on node output " + name);
+		Debug.LogError("Invalid Get Type '" + typeof(T1).ToString() + "' on node output " + propertyName);
 		return default(T1);
 	}
 
@@ -143,6 +149,6 @@ public class NodeOutput<T> : NodeConnector {
 				value = (T) Convert.ChangeType(t, typeof(T));
 			}
 		} catch (Exception e) {}
-		Debug.LogError("Invalid Set Type '" + typeof(T1).ToString() + "' of Value '" + t.ToString() + "' on node output " + name);
+		Debug.LogError("Invalid Set Type '" + typeof(T1).ToString() + "' of Value '" + t.ToString() + "' on node output " + propertyName);
 	}
 }

@@ -8,9 +8,10 @@ using UnityEditor;
 public class NodeUIGraph : ScriptableObject {
 
 	private Vector2 defaultNodeSize = new Vector2(200, 50);
-	public List<Node> nodes {get;protected set;}
+	public List<Node> nodes;
 	public GUIStyle nodeUIStyle;
 	public GUIStyle nodeUISelectedStyle;
+	public Node tNode;
 
 
 	public void AddNodeAt(Vector2 pos) {
@@ -21,6 +22,7 @@ public class NodeUIGraph : ScriptableObject {
 		node.nodeUIRect = new Rect(pos, defaultNodeSize);
 		nodes.Add(node);
 		Debug.Log("Added node at " + pos);
+		
 	}
 	public SerializedObject GetSerializedNode(Node node) {
 		SerializedObject snode = new SerializedObject(node);
