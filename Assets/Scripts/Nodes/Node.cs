@@ -7,13 +7,22 @@ using UnityEngine;
 [Serializable]
 public class Node : ScriptableObject {
 
-	public string nodeUITitle;
+	public string nodeUITitle = "Node";
 	public Rect nodeUIRect;
 	private bool isDragged;
 	protected bool isSelected;
-	protected NodeUIGraph graph;
+	[NonSerialized]
+	public NodeUIGraph graph;
 	public List<NodeConnector> inputConnections;
 	public List<NodeConnector> outputs;
+
+
+	protected GUIStyle normalStyle;
+	protected GUIStyle selectedStyle;
+	protected GUIStyle inputConnectorStyle;
+	protected GUIStyle inputConnectorConnectedStyle;
+	protected GUIStyle outputConnectorStyle;
+	protected GUIStyle outputConnectorConnectedStyle;
 
 	//testing
 	public string prop;
@@ -22,12 +31,28 @@ public class Node : ScriptableObject {
 
 	public Node() {}
 
+	private void Awake() {
+		
+		// setup style
+		normalStyle = new GUIStyle();
+		// normalStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture2D;
+		normalStyle.border = new RectOffset(12, 12, 12, 12);
+
+		selectedStyle = new GUIStyle();
+		// selectedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1 pn.png") as Texture2D;
+		selectedStyle.border = new RectOffset(15, 15, 15, 15);
+		inputConnectorStyle = new GUIStyle();
+		inputConnectorConnectedStyle = new GUIStyle();
+		outputConnectorStyle = new GUIStyle();
+		outputConnectorConnectedStyle = new GUIStyle();
+	}
+
 	public void NodeDraw(SerializedObject me) {
 		// node.Update();
 		Debug.Log("Drawing " + me.GetType());
 		// if (node.GetType().IsSubclassOf(typeof(PropertyNode)) || node.GetType()==typeof(PropertyNode))
 		Rect rect = me.FindProperty("nodeUIRect").rectValue;
-		GUI.Box(rect, me.FindProperty("nodeUITitle").stringValue); //todo, isSelected ? graph.nodeUISelectedStyle : graph.nodeUIStyle);
+		GUI.Box(rect, me.FindProperty("nodeUITitle").stringValue, isSelected ? selectedStyle : normalStyle);
 		SerializedProperty sp = me.GetIterator();
 		sp.Next(true);
 		sp.NextVisible(true); // ignore Script
@@ -37,12 +62,17 @@ public class Node : ScriptableObject {
 		sp.NextVisible(false); // ignore outputs
 		float lineHeight = EditorGUIUtility.singleLineHeight;
 		Rect nextPropRect = new Rect(rect.x + 10, rect.y + 5, rect.width / 5, lineHeight);
+		Rect boxRect = new Rect();
 		while (sp.NextVisible(false)) {
-			NodeDrawProperty(nextPropRect, sp);
+			// NodeDrawProperty(nextPropRect, sp);
+			GUI.Box(boxRect, GUIContent.none, inputConnectorStyle);
+			EditorGUI.LabelField(nextPropRect, sp.displayName);
+			// EditorGUI.PropertyField(nextPropRect, sp, GUIContent.none);
 			nextPropRect.y += lineHeight + 2;
 		}
 		// rect.height = nextPropRect.y - rect.y;
 		me.ApplyModifiedProperties();
+		graph.Save();
 	}
 	public void NodeDrawProperty(Rect rect, SerializedProperty prop) {
 		// Debug.Log("showing " + prop.type +" "+ prop.displayName + " at " + rect);
@@ -70,7 +100,6 @@ public class Node : ScriptableObject {
 					if (e.button == 0) {
 						isSelected = false;
 						GUI.changed = true;
-						e.Use();
 					}
 				}
 				break;
@@ -115,15 +144,15 @@ public class Node : ScriptableObject {
 }
 
 [Serializable]
-public abstract class NodeConnector : ScriptableObject {
+public class NodeConnector : ScriptableObject {
 
 	public string propertyName;
 	public Node connection;
 	public NodeConnector(string name) {
 		this.propertyName = name;
 	}
-	public abstract T GetValue<T>();
-	public abstract void SetValue<T>(T t);
+	public virtual T GetValue<T>() {return default(T);}
+	public virtual void SetValue<T>(T t) {}
 }
 public class NodeOutput<T> : NodeConnector {
 	public T value;
@@ -138,7 +167,7 @@ public class NodeOutput<T> : NodeConnector {
 			if (typeof(T1) == typeof(T) || typeof(T1).IsSubclassOf(typeof(T))) {
 				return (T1) Convert.ChangeType(value, typeof(T1));
 			}
-		} catch (Exception e) {}
+		} catch (Exception) {}
 		Debug.LogError("Invalid Get Type '" + typeof(T1).ToString() + "' on node output " + propertyName);
 		return default(T1);
 	}
@@ -148,7 +177,7 @@ public class NodeOutput<T> : NodeConnector {
 			if (typeof(T1) == typeof(T) || typeof(T1).IsSubclassOf(typeof(T))) {
 				value = (T) Convert.ChangeType(t, typeof(T));
 			}
-		} catch (Exception e) {}
+		} catch (Exception) {}
 		Debug.LogError("Invalid Set Type '" + typeof(T1).ToString() + "' of Value '" + t.ToString() + "' on node output " + propertyName);
 	}
 }

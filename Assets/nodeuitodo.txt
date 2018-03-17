@@ -1,0 +1,5 @@
+todo 
+keep the serialized nodeuigraph instead of the scriptable asset?
+json manual serialization?
+node has id - for nodeconnectors to connect to it
+

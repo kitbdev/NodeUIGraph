@@ -11,14 +11,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13cb4077bd55410479442f21c7b18b92, type: 3}
   m_Name: t2
   m_EditorClassIdentifier: 
-  nodes:
-    m_name: coolcat
-    nodeUITitle: cool
-    nodeUIRect:
-      x: 100
-      y: 100
-      width: 40
-      height: 20
+  nodes: []
   nodeUIStyle:
     m_Name: 
     m_Normal:
@@ -153,3 +146,4 @@ MonoBehaviour:
     m_FixedHeight: 0
     m_StretchWidth: 1
     m_StretchHeight: 0
+  tNode: {fileID: 0}

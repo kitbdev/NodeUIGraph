@@ -7,9 +7,6 @@ public class NodeUIGraphEditor : EditorWindow {
 
 	Vector2 offset;
 
-	public GUIStyle nodeStyle;
-	public GUIStyle nodeSelectedStyle;
-
 	private Rect menuBar;
 	
 	// SerializedProperty nodes;
@@ -21,16 +18,6 @@ public class NodeUIGraphEditor : EditorWindow {
 		window.titleContent = new GUIContent("Node UI Graph Editor");
 	}
 	void OnEnable() {
-		// setup style
-		nodeStyle = new GUIStyle();
-		nodeStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture2D;
-		nodeStyle.border = new RectOffset(12, 12, 12, 12);
-
-		nodeSelectedStyle = new GUIStyle();
-		nodeSelectedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1 pn.png") as Texture2D;
-		nodeSelectedStyle.border = new RectOffset(12, 12, 12, 12);
-		// nodeUIGraph.nodeUIStyle = nodeStyle;
-		// nodeUIGraph.nodeUIStyle = nodeSelectedStyle;
 	}
 	private void Awake() {
 		OnSelectionChange();
@@ -40,6 +27,7 @@ public class NodeUIGraphEditor : EditorWindow {
 		if (Selection.activeObject as NodeUIGraph != null) {
 			nodeUIGraph = Selection.activeObject as NodeUIGraph;
 		}
+		Repaint();
 	}
 	private void OnGUI() {
 
