@@ -8,6 +8,7 @@ using UnityEngine;
 public class Node : ScriptableObject {
 
 	[ContextMenuItem("Reset protected values", "Awake")]
+	[ContextMenuItem("Run Start", "Start")]
 	public string nodeUITitle = "Node";
 	public Rect nodeUIRect;
 	private bool isDragged = false;
@@ -16,7 +17,8 @@ public class Node : ScriptableObject {
 	public List<NodeConnector> inputConnections;
 	public List<NodeConnector> outputs;
 
-	private float lineHeight;
+	private float lineHeight = EditorGUIUtility.singleLineHeight + 2;
+	float connectorBoxSize = 10;
 	protected GUIStyle normalStyle;
 	protected GUIStyle selectedStyle;
 	protected GUIStyle inputConnectorStyle;
@@ -25,8 +27,9 @@ public class Node : ScriptableObject {
 	protected GUIStyle outputConnectorConnectedStyle;
 
 	//testing
-	public string prop;
+	public string propert;
 	public int prop2;
+	public Vector3 propp;
 	public GameObject proprtyNumberThree;
 
 	public Node() {}
@@ -45,7 +48,10 @@ public class Node : ScriptableObject {
 		inputConnectorConnectedStyle = new GUIStyle();
 		outputConnectorStyle = new GUIStyle();
 		outputConnectorConnectedStyle = new GUIStyle();
+
 		lineHeight = EditorGUIUtility.singleLineHeight + 2;
+		connectorBoxSize = 10;
+
 		if (inputConnections == null) {
 			inputConnections = new List<NodeConnector>();
 		}
@@ -66,9 +72,8 @@ public class Node : ScriptableObject {
 		sp.NextVisible(false); // ignore rect
 		sp.NextVisible(false); // ignore input connections
 		sp.NextVisible(false); // ignore outputs
-		Rect nextPropRect = new Rect(rect.x + 10, rect.y + 5, rect.width / 5, lineHeight);
-		float boxHeight = 10;
-		Rect boxRect = new Rect(nextPropRect.x - 10, nextPropRect.y + boxHeight / 2, boxHeight, boxHeight);
+		Rect nextPropRect = new Rect(rect.x + 10, rect.y + 15, rect.width * 0.4f, lineHeight);
+		Rect boxRect = new Rect(rect.x, nextPropRect.y + (lineHeight - connectorBoxSize) * 0.5f, connectorBoxSize, connectorBoxSize);
 		int inputCounter = 0;
 		while (sp.NextVisible(false)) {
 			GUI.Box(boxRect, GUIContent.none); //, inputConnectorStyle);
@@ -84,6 +89,17 @@ public class Node : ScriptableObject {
 			inputCounter++;
 		}
 		rect.height = nextPropRect.y - rect.y;
+
+		Rect outlabelRect = new Rect(rect.x + rect.width - connectorBoxSize - rect.width * 0.4f, rect.y + 15, rect.width * 0.4f, lineHeight);
+		Rect outboxRect = new Rect(rect.x + rect.width - connectorBoxSize, rect.y + 15 + (lineHeight - connectorBoxSize) * 0.5f, connectorBoxSize, connectorBoxSize);
+		for (int i = 0; i < outputs.Count; i++) {
+			if (outputs[i] != null) {
+				EditorGUI.LabelField(outboxRect, outputs[i].propertyName);
+			}
+			GUI.Box(outboxRect, GUIContent.none);
+			outboxRect.y += lineHeight;
+		}
+
 		me.FindProperty("nodeUIRect").rectValue = rect;
 		me.ApplyModifiedProperties();
 		// me.Update();
@@ -110,13 +126,13 @@ public class Node : ScriptableObject {
 	public void ProcessEvents(Event e) {
 		for (int i = 0; i < inputConnections.Count; i++) {
 			if (inputConnections[i] != null) {
-				Rect box = new Rect();
-				ProcessConnectorEvents(e, box);
+				Rect boxRect = new Rect(nodeUIRect.x, nodeUIRect.y + 15 + (lineHeight - connectorBoxSize) * 0.5f + i * lineHeight, connectorBoxSize, connectorBoxSize);
+				ProcessConnectorEvents(e, boxRect);
 			}
 		}
 		for (int i = 0; i < outputs.Count; i++) {
-			Rect box = new Rect();
-			ProcessConnectorEvents(e, box);
+			Rect boxRect = new Rect(nodeUIRect.x + nodeUIRect.width - connectorBoxSize, nodeUIRect.y + 15 + (lineHeight - connectorBoxSize) * 0.5f + i * lineHeight, connectorBoxSize, connectorBoxSize);
+			ProcessConnectorEvents(e, boxRect);
 		}
 		switch (e.type) {
 			case EventType.MouseDown:
@@ -163,8 +179,9 @@ public class Node : ScriptableObject {
 		contextMenu.ShowAsContext();
 	}
 
-	public void AddOutput<T>(string name, T defaultValue = default(T)) {
-		outputs.Add(new NodeConnector<T>(name, defaultValue));
+	public void AddOutput<T>(string propertyName, T defaultValue = default(T)) {
+		NodeConnector nc = graph.CreateConnector(propertyName, defaultValue);
+		outputs.Add(nc);
 	}
 
 	public void SetOutput<T>(string name, T value) {
@@ -178,7 +195,11 @@ public class Node : ScriptableObject {
 
 	}
 
-	public virtual void Start() {}
+	public virtual void Start() {
+		AddOutput<string>("strout");
+		AddOutput<int>("intout");
+		AddOutput<GameObject>("goout");
+	}
 	public virtual void OnGUI() {}
 }
 
@@ -187,21 +208,31 @@ public class NodeConnector : ScriptableObject {
 
 	public string propertyName;
 	public NodeConnector connectedInput;
-	public NodeConnector(string name) {
-		this.propertyName = name;
-	}
+
+	public NodeConnector() {}
+
+	// public NodeConnector(string name) {
+	// 	this.propertyName = name;
+	// }
 	public T GetValue<T>() {
 		return ((NodeConnector<T>) this).value;
+		// return default(T);
 	}
 	public virtual void SetValue<T>(T t) {
 		((NodeConnector<T>) this).value = t;
 	}
 }
+[Serializable]
 public class NodeConnector<T> : NodeConnector {
+
+	[SerializeField]
 	public T value;
 	public T defaultValue;
-	public NodeConnector(string name, T defaultValue) : base(name) {
-		this.defaultValue = defaultValue;
-		this.value = this.defaultValue;
-	}
+
+	public NodeConnector() : base() {}
+	// public NodeConnector(string name, T defaultValue) : base(name) {
+	// 	this.defaultValue = defaultValue;
+	// 	this.value = this.defaultValue;
+	// }
+
 }

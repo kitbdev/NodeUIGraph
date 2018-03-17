@@ -44,6 +44,12 @@ public class NodeUIGraph : ScriptableObject {
 		DestroyImmediate(node, true);
 		AssetDatabase.SaveAssets();
 	}
+	public NodeConnector CreateConnector<T>(string propertyName, T defaultValue = default(T)) {
+		NodeConnector<T> nc = ScriptableObject.CreateInstance<NodeConnector<T>>();
+		nc.propertyName = propertyName;
+		nc.defaultValue = defaultValue;
+		return nc;
+	}
 	public void Save() {
 		AssetDatabase.SaveAssets();
 	}
