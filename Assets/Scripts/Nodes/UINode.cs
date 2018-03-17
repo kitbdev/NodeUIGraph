@@ -5,19 +5,17 @@ using UnityEngine;
 public class UINode : Node {
 	
 	// inputs
-	// positioning
 	Rect rect;
-	// anchoring
-	// style
+	// todo anchoring
 	GUIStyle style;
 	
-	// outputs
+	// no outputs?
+
 	public override void Start() {
-		AddInput<Rect>("rect");
-		AddInput<GUIStyle>("style");
+
 	}
 
 	public override void OnGUI() {
-		GUI.Box(GetInputFor<Rect>("rect"), "", GetInputFor<GUIStyle>("style"));
+		GUI.Box(rect, "", style);
 	}
 }
